@@ -7,6 +7,8 @@ function App() {
   const [error, setError] = useState(null);
   const [city, setCity] = useState('Moscow'); // По умолчанию Москва
   const [inputCity, setInputCity] = useState(''); // Для хранения введенного города
+  const [theme, setTheme] = useState('light'); // Светлая по умолчанию
+  const [forecast, setForecast] = useState([]); // Для прогноза
 
   useEffect(() => {
     const fetchWeather = async () => {
@@ -22,14 +24,36 @@ function App() {
           }
         );
         setWeather(response.data);
+        // Прогноз на 5 дней
+        const forecastResponse = await axios.get(
+          'https://api.openweathermap.org/data/2.5/forecast',
+          {
+            params: {
+              q: city,
+              appid: '28bf50b336c7c531516c01229ec84287',
+              units: 'metric',
+            },
+          }
+        );
+        // Фильтруем данные, берем только полдень (12:00) каждого дня
+        const dailyForecast = forecastResponse.data.list.filter((item) =>
+          item.dt_txt.includes('12:00:00')
+        );
+        setForecast(dailyForecast);
+
         setError(null);
+        // Автоматическая тема по погоде
+        if (theme === 'auto' && response.data.weather[0].main) {
+          const weatherType = response.data.weather[0].main.toLowerCase();
+          setTheme(weatherType === 'rain' || weatherType === 'clouds' ? 'dark' : 'light');
+        }
       } catch (error) {
         console.error('Ошибка при загрузке погоды:', error);
         setError('Не удалось найти город. Попробуй еще раз!');
       }
     };
     fetchWeather();
-  }, [city]); // Зависимость от city — запрос повторяется при его изменении
+  }, [city, theme]); // Обновляем при смене города или темы
 
   const handleCityChange = () => {
     if (inputCity.trim()) { // Проверяем, что поле не пустое
@@ -39,7 +63,7 @@ function App() {
   };
 
   return (
-    <div>
+<div className={`app ${theme}`}>
       <h1>Weather App</h1>
       <div>
         <input
@@ -50,16 +74,38 @@ function App() {
         />
         <button onClick={handleCityChange}>Показать погоду</button>
       </div>
+      <div>
+        <button onClick={() => setTheme('light')}>Светлая</button>
+        <button onClick={() => setTheme('dark')}>Темная</button>
+        <button onClick={() => setTheme('auto')}>По погоде</button>
+      </div>
+
+      {/* Текущая погода */}
       {error ? (
         <p>{error}</p>
       ) : weather ? (
         <div>
-          <p>Город: {weather.name}</p>
+          <h2>Сейчас в {weather.name}</h2>
           <p>Температура: {weather.main.temp}°C</p>
           <p>Погода: {weather.weather[0].description}</p>
         </div>
       ) : (
         <p>Загружаем...</p>
+      )}
+
+      {/* Прогноз */}
+      {forecast.length > 0 && (
+        <div>
+          <h2>Прогноз на 5 дней</h2>
+          <ul>
+            {forecast.map((day) => (
+              <li key={day.dt}>
+                {new Date(day.dt * 1000).toLocaleDateString()} — {day.main.temp}°C,{' '}
+                {day.weather[0].description}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );

@@ -1,8 +1,23 @@
 body {
   font-family: Arial, sans-serif;
   margin: 0;
+  padding: 0;
+}
+
+.app {
   padding: 20px;
-  transition: background-color 0.3s;
+  min-height: 100vh;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.app.light {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.app.dark {
+  background-color: #333;
+  color: #f0f0f0;
 }
 
 input {
@@ -14,6 +29,7 @@ input {
 
 button {
   padding: 8px 16px;
+  margin: 5px;
   background-color: #007bff;
   color: white;
   border: none;
@@ -23,4 +39,14 @@ button {
 
 button:hover {
   background-color: #0056b3;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
 }
