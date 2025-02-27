@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
+import WeatherGraph from './components/WeatherGraph';
+
 
 function App() {
   const [weather, setWeather] = useState(null);
@@ -97,14 +99,7 @@ function App() {
       {forecast.length > 0 && (
         <div>
           <h2>Прогноз на 5 дней</h2>
-          <ul>
-            {forecast.map((day) => (
-              <li key={day.dt}>
-                {new Date(day.dt * 1000).toLocaleDateString()} — {day.main.temp}°C,{' '}
-                {day.weather[0].description}
-              </li>
-            ))}
-          </ul>
+          <WeatherGraph forecast={forecast} />
         </div>
       )}
     </div>
